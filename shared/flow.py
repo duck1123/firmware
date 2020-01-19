@@ -190,6 +190,7 @@ NormalSystem = [
     #         xxxxxxxxxxxxxxxx
     MenuItem('Ready To Sign', f=ready2sign),
     MenuItem('Passphrase', f=start_b39_pw, predicate=lambda: settings.get('words', True)),
+    MenuItem('Calculator', f=calculator),
     MenuItem('Secure Logout', f=logout_now),
     MenuItem('Advanced', menu=AdvancedNormalMenu),
     MenuItem('Settings', menu=SettingsMenu),

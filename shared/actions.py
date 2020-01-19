@@ -1436,4 +1436,88 @@ async def import_multisig(*a):
     except Exception as e:
         await ux_show_story('Failed to import.\n\n\n'+str(e))
 
+async def pick_operator(*a):
+    async def add_op(menu, _2, item):
+        menu.chosen = item.arg
+        the_ux.pop()
+        return menu.chosen
+
+    from menu import MenuSystem, MenuItem
+    rv = [
+        MenuItem("+", f=add_op, arg='+'),
+        MenuItem("-", f=add_op, arg='-'),
+        MenuItem("*", f=add_op, arg='*'),
+        MenuItem("/", f=add_op, arg='/'),
+        MenuItem(".", f=add_op, arg='.'),
+        MenuItem("=", f=add_op, arg='=')
+    ]
+    menu = MenuSystem(rv)
+    the_ux.push(menu)
+    await menu.interact()
+    return menu.chosen
+
+def process_op(total, buff, operand, op, chosen_op):
+    new_total = None
+    new_buff = None
+    new_operand = None
+    new_op = None
+
+    if (chosen_op == '.'):
+        new_buff = buff + '.'
+    else:
+        new_op = chosen_op
+
+        if (buff != ''):
+            n = float(buff)
+            new_buff = ''
+            new_operand = ''
+
+            if (chosen_op == '='):
+                new_op = ''
+
+            if (op == '+'):
+                new_total = total + n
+            if (op == '-'):
+                new_total = total - n
+            if (op == '*'):
+                new_total = total * n
+            if (op == '/'):
+                new_total = total / n
+            if (op == '^'):
+                new_total = total ^ n
+    return new_total, new_buff, new_operand, new_op
+
+async def calculator(*a):
+    total = 0.0
+    buff = ''
+    op = ''
+    operand = ''
+
+    while 1:
+        msg = '' + str(total) + '\n' + op + ' ' + operand
+        ch = await ux_show_story(msg, escape='1234567890')
+
+        if (ch == 'x'):
+            return
+
+        if (ch == 'y'):
+            chosen_op = await pick_operator()
+            new_total, new_buff, new_operand, new_op = process_op(total, buff, operand, op, chosen_op)
+
+            if (new_total != None):
+                total = new_total
+            if (new_buff != None):
+                buff = new_buff
+            if (new_operand != None):
+                operand = new_operand
+            if (new_op != None):
+                op = new_op
+        else:
+            # Numeric key pressed
+            buff = buff + ch
+            if (op == ''):
+                total = float(buff)
+            else:
+                operand = buff
+
 # EOF
